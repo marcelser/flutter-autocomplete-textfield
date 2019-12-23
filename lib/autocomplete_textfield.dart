@@ -91,7 +91,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       key.currentState.updateDecoration(decoration, inputFormatters,
           textCapitalization, style, keyboardType, textInputAction);
 
-  TextField get textField => key.currentState.textField;
+  TextFormField get textField => key.currentState.textField;
 
   @override
   State<StatefulWidget> createState() => new AutoCompleteTextFieldState<T>(
@@ -121,7 +121,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
 class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   final LayerLink _layerLink = LayerLink();
 
-  TextField textField;
+  TextFormField textField;
   List<T> suggestions;
   StringCallback textChanged, textSubmitted;
   ValueSetter<bool> onFocusChanged;
@@ -136,6 +136,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   bool submitOnSuggestionTap, clearOnSubmit;
   TextEditingController controller;
   FocusNode focusNode;
+  bool focusCreated = true;
   bool autofocus;
 
   String currentText = "";
@@ -169,13 +170,15 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       this.controller,
       this.focusNode,
       this.autofocus) {
-    textField = new TextField(
+    if (focusNode != null) { focusCreated = false; };
+    focusNode ??= new FocusNode(); // there's not getter for focusnode, so we have to ensure there is one
+    textField = new TextFormField(
       inputFormatters: inputFormatters,
       textCapitalization: textCapitalization,
       decoration: decoration,
       style: style,
       keyboardType: keyboardType,
-      focusNode: focusNode ?? new FocusNode(),
+      focusNode: focusNode,
       autofocus: autofocus,
       controller: controller ?? new TextEditingController(),
       textInputAction: textInputAction,
@@ -190,7 +193,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       onTap: () {
         updateOverlay(currentText);
       },
-      onSubmitted: (submittedText) =>
+      onFieldSubmitted: (submittedText) =>
           triggerSubmitted(submittedText: submittedText),
     );
 
@@ -198,12 +201,12 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       currentText = this.controller.text;
     }
 
-    textField.focusNode.addListener(() {
+    this.focusNode.addListener(() {
       if (onFocusChanged != null) {
-        onFocusChanged(textField.focusNode.hasFocus);
+        onFocusChanged(this.focusNode.hasFocus);
       }
 
-      if (!textField.focusNode.hasFocus) {
+      if (!this.focusNode.hasFocus) {
         filteredSuggestions = [];
         updateOverlay();
       } else if (!(currentText == "" || currentText == null)) {
@@ -244,7 +247,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     }
 
     setState(() {
-      textField = new TextField(
+      textField = new TextFormField(
         inputFormatters: this.inputFormatters,
         textCapitalization: this.textCapitalization,
         decoration: this.decoration,
@@ -265,7 +268,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
         onTap: () {
           updateOverlay(currentText);
         },
-        onSubmitted: (submittedText) =>
+        onFieldSubmitted: (submittedText) =>
             triggerSubmitted(submittedText: submittedText),
       );
     });
@@ -330,7 +333,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                                       if (submitOnSuggestionTap) {
                                         String newText = suggestion.toString();
                                         textField.controller.text = newText;
-                                        textField.focusNode.unfocus();
+                                        this.focusNode.unfocus();
                                         itemSubmitted(suggestion);
                                         if (clearOnSubmit) {
                                           clear();
@@ -373,8 +376,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   void dispose() {
     // if we created our own focus node and controller, dispose of them
     // otherwise, let the caller dispose of their own instances
-    if (focusNode == null) {
-      textField.focusNode.dispose();
+    if (focusCreated) {
+      this.focusNode.dispose();
     }
     if (controller == null) {
       textField.controller.dispose();
