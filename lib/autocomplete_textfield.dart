@@ -81,6 +81,8 @@ class AutoCompleteTextField<T> extends StatefulWidget {
 
   void triggerSubmitted() => key.currentState.triggerSubmitted();
 
+  void updateCurrentText(String newText) => key.currentState.updateOverlay(newText);
+
   void updateDecoration(
           {InputDecoration decoration,
           List<TextInputFormatter> inputFormatters,
