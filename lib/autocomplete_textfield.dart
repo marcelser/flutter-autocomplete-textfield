@@ -81,7 +81,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
 
   void triggerSubmitted() => key.currentState.triggerSubmitted();
 
-  void updateCurrentText(String newText) => key.currentState.updateOverlay(newText);
+  void updateCurrentText(String newText) => key.currentState.updateText(newText);
 
   void updateDecoration(
           {InputDecoration decoration,
@@ -289,6 +289,21 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   void clear() {
     textField.controller.clear();
     currentText = "";
+    updateOverlay();
+  }
+
+  void updateText(String newText) {
+    setState(() {
+      currentText = newText;
+      textField.controller.text = currentText;
+      this.focusNode.unfocus();
+      var suggestion =
+          suggestions.firstWhere((suggestion) => suggestion.toString() ==
+              currentText, orElse: () => null);
+      if (suggestion != null) {
+        itemSubmitted(suggestion);
+      }
+    });
     updateOverlay();
   }
 
