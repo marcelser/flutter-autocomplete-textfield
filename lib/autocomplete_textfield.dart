@@ -34,6 +34,10 @@ class AutoCompleteTextField<T> extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool autofocus;
+  final bool autoSelect;
+
+  final FormFieldSetter<String> onSaved;
+  final FormFieldValidator<String> validator;
 
   AutoCompleteTextField(
       {@required
@@ -65,7 +69,10 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       this.minLength = 1,
       this.controller,
       this.focusNode,
-      this.autofocus = false})
+      this.autofocus = false,
+      this.autoSelect = false,
+      this.onSaved,
+      this.validator})
       : super(key: key);
 
   void clear() => key.currentState.clear();
@@ -117,7 +124,10 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       textInputAction,
       controller,
       focusNode,
-      autofocus);
+      autofocus,
+      autoSelect,
+      onSaved,
+      validator);
 }
 
 class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
@@ -140,6 +150,9 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   FocusNode focusNode;
   bool focusCreated = true;
   bool autofocus;
+  bool autoSelect;
+  FormFieldSetter<String> onSaved;
+  FormFieldValidator<String> validator;
 
   String currentText = "";
 
@@ -171,7 +184,10 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       this.textInputAction,
       this.controller,
       this.focusNode,
-      this.autofocus) {
+      this.autofocus,
+      this.autoSelect,
+      this.onSaved,
+      this.validator) {
     if (focusNode != null) { focusCreated = false; };
     focusNode ??= new FocusNode(); // there's not getter for focusnode, so we have to ensure there is one
     textField = new TextFormField(
@@ -197,6 +213,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       },
       onFieldSubmitted: (submittedText) =>
           triggerSubmitted(submittedText: submittedText),
+      onSaved: this.onSaved,
+      validator: this.validator,
     );
 
     if (this.controller != null && this.controller.text != null) {
@@ -213,6 +231,14 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
         updateOverlay();
       } else if (!(currentText == "" || currentText == null)) {
         updateOverlay(currentText);
+        if (autoSelect) {
+          this.controller.value = this.controller.value.copyWith(
+            text: currentText,
+            selection: TextSelection(
+                baseOffset: 0, extentOffset: currentText.length),
+            composing: TextRange.empty,
+          );
+        }
       }
     });
   }
@@ -272,6 +298,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
         },
         onFieldSubmitted: (submittedText) =>
             triggerSubmitted(submittedText: submittedText),
+        onSaved: onSaved,
+        validator: validator
       );
     });
   }
@@ -300,8 +328,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     }
     suggestions.add(newSuggestion);
     setState(() {
-      String newText = newSuggestion.toString();
-      textField.controller.text = newText;
+      currentText = newSuggestion.toString();
+      textField.controller.text = currentText;
       itemSubmitted(newSuggestion);
     });
     this.focusNode.unfocus();
@@ -349,8 +377,8 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                                   onTap: () {
                                     setState(() {
                                       if (submitOnSuggestionTap) {
-                                        String newText = suggestion.toString();
-                                        textField.controller.text = newText;
+                                        currentText = suggestion.toString();
+                                        textField.controller.text = currentText;
                                         this.focusNode.unfocus();
                                         itemSubmitted(suggestion);
                                         if (clearOnSubmit) {
@@ -479,5 +507,8 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
           textInputAction,
           controller,
           focusNode,
-          autofocus);
+          autofocus,
+          autoSelect,
+          onSaved,
+          validator);
 }
