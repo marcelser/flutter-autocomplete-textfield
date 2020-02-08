@@ -334,6 +334,12 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     });
     this.focusNode.unfocus();
     updateOverlay();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      setState(() {
+        focusNode.unfocus();
+        // Here you can write your code for open new view
+      });
+    });
   }
 
   void addSuggestion(T suggestion) {
