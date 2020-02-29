@@ -2,6 +2,7 @@ library autocomplete_textfield;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 typedef Widget AutoCompleteOverlayItemBuilder<T>(
     BuildContext context, T suggestion);
@@ -162,6 +163,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   TextStyle style;
   TextInputType keyboardType;
   TextInputAction textInputAction;
+  ScrollController _scrollController = ScrollController();
 
   AutoCompleteTextFieldState(
       this.suggestions,
@@ -359,47 +361,59 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     updateOverlay(currentText);
   }
 
+  double max(double value1,double value2) {
+    return value1 > value2 ? value1 : value2;
+  }
+
   void updateOverlay([String query]) {
     if (listSuggestionsEntry == null) {
       final Size textFieldSize = (context.findRenderObject() as RenderBox).size;
       final width = textFieldSize.width;
       final height = textFieldSize.height;
-      listSuggestionsEntry = new OverlayEntry(builder: (context) {
-        return new Positioned(
+      listSuggestionsEntry = OverlayEntry(builder: (context) {
+        return Positioned(
             width: width,
             child: CompositedTransformFollower(
                 link: _layerLink,
                 showWhenUnlinked: false,
                 offset: Offset(0.0, height),
-                child: new SizedBox(
-                    width: width,
-                    child: new Card(
-                        child: new Column(
-                      children: filteredSuggestions.map((suggestion) {
-                        return new Row(children: [
-                          new Expanded(
-                              child: new InkWell(
-                                  child: itemBuilder(context, suggestion),
-                                  onTap: () {
-                                    setState(() {
-                                      if (submitOnSuggestionTap) {
-                                        currentText = suggestion.toString();
-                                        textField.controller.text = currentText;
-                                        this.focusNode.unfocus();
-                                        itemSubmitted(suggestion);
-                                        if (clearOnSubmit) {
-                                          clear();
-                                        }
-                                      } else {
-                                        String newText = suggestion.toString();
-                                        textField.controller.text = newText;
-                                        textChanged(newText);
-                                      }
-                                    });
-                                  }))
-                        ]);
-                      }).toList(),
-                    )))));
+                child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                        minWidth: width,
+                        maxWidth: width,
+                        minHeight: 0,
+                        maxHeight: max(0,
+                            MediaQuery.of(context).viewInsets.bottom)),
+                    child: Card(
+                        child: Scrollbar(
+                            child: ListView(
+                              shrinkWrap: true,
+                              controller: _scrollController,
+                              children: filteredSuggestions.map((suggestion) {
+                                return Row(children: <Widget>[
+                                  Expanded(
+                                      child: InkWell(
+                                          child: itemBuilder(context, suggestion),
+                                          onTap: () {
+                                            setState(() {
+                                              if (submitOnSuggestionTap) {
+                                                String Text = suggestion.toString();
+                                                textField.controller.text = Text;
+                                                focusNode.unfocus();
+                                                itemSubmitted(suggestion);
+                                                if (clearOnSubmit) {
+                                                  clear();
+                                                }
+                                              } else {
+                                                String Text = suggestion.toString();
+                                                textField.controller.text = Text;
+                                                textChanged(Text);
+                                              }
+                                            });
+                                          }))
+                                ]);
+                              }).toList(),
+                            ), controller: _scrollController,)))));
       });
       Overlay.of(context).insert(listSuggestionsEntry);
     }
