@@ -332,9 +332,9 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     setState(() {
       currentText = newSuggestion.toString();
       textField.controller.text = currentText;
+      this.focusNode.unfocus();
       itemSubmitted(newSuggestion);
     });
-    this.focusNode.unfocus();
     updateOverlay();
     Future.delayed(const Duration(milliseconds: 100), () {
       setState(() {
@@ -385,12 +385,10 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                         maxHeight: max(0,
                             MediaQuery.of(context).viewInsets.bottom)),
                     child: Card(
-                        child: Scrollbar(
-                            child: ListView(
-                              shrinkWrap: true,
-                              controller: _scrollController,
+                        child: SingleChildScrollView(
+                            child: Column(
                               children: filteredSuggestions.map((suggestion) {
-                                return Row(children: <Widget>[
+                                return Row(children: [
                                   Expanded(
                                       child: InkWell(
                                           child: itemBuilder(context, suggestion),
@@ -413,7 +411,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                                           }))
                                 ]);
                               }).toList(),
-                            ), controller: _scrollController,)))));
+                            ), controller: _scrollController )))));
       });
       Overlay.of(context).insert(listSuggestionsEntry);
     }
