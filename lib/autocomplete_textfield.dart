@@ -367,9 +367,11 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
 
   void updateOverlay([String query]) {
     if (listSuggestionsEntry == null) {
-      final Size textFieldSize = (context.findRenderObject() as RenderBox).size;
+      final textfieldRenderObject = (context.findRenderObject() as RenderBox);
+      final Size textFieldSize = textfieldRenderObject.size;
       final width = textFieldSize.width;
       final height = textFieldSize.height;
+      final position = textfieldRenderObject.localToGlobal(Offset.zero);
       listSuggestionsEntry = OverlayEntry(builder: (context) {
         return Positioned(
             width: width,
@@ -383,8 +385,9 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                         maxWidth: width,
                         minHeight: 0,
                         maxHeight: max(0,
-                            MediaQuery.of(context).viewInsets.bottom)),
+                            MediaQuery.of(context).size.height - MediaQuery.of(context).viewInsets.bottom - position.dy - height)),
                     child: Card(
+                      child: Scrollbar(
                         child: SingleChildScrollView(
                             child: Column(
                               children: filteredSuggestions.map((suggestion) {
@@ -411,7 +414,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                                           }))
                                 ]);
                               }).toList(),
-                            ), controller: _scrollController )))));
+                            ), controller: _scrollController ))))));
       });
       Overlay.of(context).insert(listSuggestionsEntry);
     }
