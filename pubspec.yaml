@@ -4,8 +4,10 @@ version: 1.7.3
 author: Felix McCuaig <felixmccuaigdev@gmail.com>
 homepage: https://github.com/felixlucien/flutter-autocomplete-textfield
 
+publish_to: 'none'
+
 environment:
-    sdk: ">=1.19.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
   flutter:
