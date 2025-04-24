@@ -1,4 +1,4 @@
-import 'package:autocomplete_textfield/autocomplete_textfield.dart';
+//import 'package:autocomplete_textfield/autocomplete_textfield.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(new MyApp());
@@ -32,10 +32,10 @@ class _MyHomePageState extends State<MyHomePage> {
         items: [
           new BottomNavigationBarItem(
               icon: new Center(child: new Text("1")),
-              title: new Text("Simple Use")),
+              label: "Simple Use"),
           new BottomNavigationBarItem(
               icon: new Center(child: new Text("2")),
-              title: new Text("Complex Use")),
+              label: "Complex Use"),
         ],
         onTap: (index) => setState(() {
               selectedIndex = index;
@@ -55,11 +55,10 @@ class FirstPage extends StatefulWidget {
 class _FirstPageState extends State<FirstPage> {
   List<String> added = [];
   String currentText = "";
-  GlobalKey<AutoCompleteTextFieldState<String>> key = new GlobalKey();
 
   _FirstPageState() {
     textField = SimpleAutoCompleteTextField(
-      key: key,
+      key: new GlobalKey(),
       decoration: new InputDecoration(errorText: "Beans"),
       controller: TextEditingController(text: "Starting Text"),
       suggestions: suggestions,
@@ -108,7 +107,7 @@ class _FirstPageState extends State<FirstPage> {
     "Zest"
   ];
 
-  SimpleAutoCompleteTextField textField;
+  SimpleAutoCompleteTextField? textField;
   bool showWhichErrorText = false;
 
   @override
@@ -119,9 +118,9 @@ class _FirstPageState extends State<FirstPage> {
           trailing: new IconButton(
               icon: new Icon(Icons.add),
               onPressed: () {
-                textField.triggerSubmitted();
+                textField?.triggerSubmitted();
                 showWhichErrorText = !showWhichErrorText;
-                textField.updateDecoration(
+                textField?.updateDecoration(
                     decoration: new InputDecoration(
                         errorText: showWhichErrorText ? "Beans" : "Tomatoes"));
               })),
@@ -132,7 +131,7 @@ class _FirstPageState extends State<FirstPage> {
     }));
 
     return new Scaffold(
-        resizeToAvoidBottomPadding: false,
+        resizeToAvoidBottomInset: false,
         appBar: new AppBar(
             title: new Text('AutoComplete TextField Demo Simple'),
             actions: [
@@ -147,11 +146,11 @@ class _FirstPageState extends State<FirstPage> {
                             content: new TextField(
                                 onChanged: (newText) => text = newText),
                             actions: [
-                              new FlatButton(
+                              new TextButton(
                                   onPressed: () {
                                     if (text != "") {
                                       suggestions.add(text);
-                                      textField.updateSuggestions(suggestions);
+                                      textField?.updateSuggestions(suggestions);
                                     }
                                     Navigator.pop(context);
                                   },
@@ -217,12 +216,12 @@ class _SecondPageState extends State<SecondPage> {
         "https://media-cdn.tripadvisor.com/media/photo-s/0e/1f/55/79/and-here-we-go.jpg")
   ];
 
-  GlobalKey key =
+  GlobalKey<AutoCompleteTextFieldState<ArbitrarySuggestionType>> key =
       new GlobalKey<AutoCompleteTextFieldState<ArbitrarySuggestionType>>();
 
-  AutoCompleteTextField<ArbitrarySuggestionType> textField;
+  AutoCompleteTextField<ArbitrarySuggestionType>? textField;
 
-  ArbitrarySuggestionType selected;
+  ArbitrarySuggestionType? selected;
 
   _SecondPageState() {
     textField = new AutoCompleteTextField<ArbitrarySuggestionType>(
@@ -245,7 +244,7 @@ class _SecondPageState extends State<SecondPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomInset: false,
       appBar: new AppBar(
         title: new Text('AutoComplete TextField Demo Complex'),
       ),
@@ -259,11 +258,11 @@ class _SecondPageState extends State<SecondPage> {
                 child: selected != null
                     ? new Column(children: [
                         new ListTile(
-                            title: new Text(selected.name),
-                            trailing: new Text("Rating: ${selected.stars}/5")),
+                            title: new Text(selected!.name),
+                            trailing: new Text("Rating: ${selected?.stars}/5")),
                         new Container(
                             child: new Image(
-                                image: new NetworkImage(selected.imgURL)),
+                                image: new NetworkImage(selected!.imgURL)),
                             width: 400.0,
                             height: 300.0)
                       ])
