@@ -2,6 +2,7 @@ library autocomplete_textfield;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:collection/collection.dart';
 
 typedef Widget AutoCompleteOverlayItemBuilder<T>(
     BuildContext context, T suggestion);
@@ -322,7 +323,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
 
   void addAndSelectSuggestion(T newSuggestion) {
     var existingSuggestion =
-    suggestions?.firstWhere((suggestion) => suggestion.toString() == newSuggestion.toString(), orElse: null);
+    suggestions?.firstWhereOrNull((suggestion) => suggestion.toString() == newSuggestion.toString());
     if (existingSuggestion != null) {
       suggestions?.remove(existingSuggestion);
     }
